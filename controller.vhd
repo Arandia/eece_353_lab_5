@@ -43,7 +43,9 @@ entity decode is
     mux_sel           : out std_logic_vector (1 downto 0);
     load_xyz, funct   : out std_logic_vector (2 downto 0);
     write             : out std_logic;
-    write_to, read_to : out std_logic_vector (2 downto 0));
+    write_to, read_to : out std_logic_vector (2 downto 0);
+    set_PC            : out std_logic;
+    set_PC_to         : out std_logic_vector (7 downto 0));
 
 end decode;
 
@@ -65,6 +67,8 @@ begin  -- lut
     write <= '0';
     write_to <= "000";
     read_to <= "000";
+    set_PC <= '0';
+    set_PC_to <= "00000000";
     
     case instruction(15 downto 11) is
       when "01000" =>                   -- Load
@@ -161,6 +165,11 @@ begin  -- lut
           write = '1';
           write_to <= instruction(10 downto 8);
         end if;
+      when "11001" =>                   -- Jump
+        if state = "010" then
+          set_PC_to <= instruction(7 downto 0);
+          set_PC <= '1';
+        end if;
       when others => null;
     end case;
   end process;
@@ -236,14 +245,17 @@ use ieee.std_logic_unsigned.all;
 entity controller is
   
   port (
-    instruction_in    : in  std_logic_vector (15 downto 0);  -- from external
+    -- INPUT
     clk               : in  std_logic;
-    get_next          : out std_logic;  -- to external
-    datapath_in       : out std_logic_vector (7 downto 0);  -- to datapath
-    mux_sel, funct    : out std_logic_vector (1 downto 0);  -- to datapath
-    load_xyz          : out std_logic_vector (2 downto 0);  -- to datapath
-    write             : out std_logic;  -- to datapath
-    write_to, read_to : out std_logic_vector (2 downto 0));  -- to datapath
+    instruction_in    : in  std_logic_vector (15 downto 0);  -- from mem
+    -- OUTPUT
+    get_next, set_PC  : out std_logic;                       -- to mem
+    set_PC_to         : out std_logic_vector (7 downto 0);
+    write             : out std_logic;                       -- to datapath
+    datapath_in       : out std_logic_vector (7 downto 0);
+    mux_sel, funct    : out std_logic_vector (1 downto 0);
+    load_xyz          : out std_logic_vector (2 downto 0);
+    write_to, read_to : out std_logic_vector (2 downto 0));
 
 end controller;
 
@@ -268,7 +280,9 @@ begin  -- control
     funct       => funct,
     write       => write,
     write_to    => write_to,
-    read_to     => read_to);
+    read_to     => read_to,
+    set_PC      => set_PC,
+    set_PC_to   => set_PC_to);
 
   p3 : state_machine port map (
     instruction          => instruction,

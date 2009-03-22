@@ -38,7 +38,7 @@ begin
       PC_in           => to_PC,
       -- OUTPUT
       instruction_out => instruction);  -- To the controller
-  
+  o
   u0: controller
     port map (
       -- INPUT
