@@ -208,7 +208,7 @@ begin  -- behavioural
           get_next_instruction <= '0';
         when "001" => state <= "010";
         when "010" =>                   -- Filter out type 1's
-          if instruction(15 downto 11) = "01000" then  -- load - type 1
+          if (instruction(15 downto 11) = "01000") or (instruction(15 downto 11) = "11001") then
             state <= "000";
             get_next_instruction <= '1';
           else
