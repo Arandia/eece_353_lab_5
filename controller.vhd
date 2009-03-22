@@ -39,7 +39,8 @@ entity decode is
   port (
     instruction       : in  std_logic_vector (15 downto 0);
     state             : in  std_logic_vector (2 downto 0);
-    datapath_in       : out std_logic_vector (7 downto 0);
+    datapath          : in  std_logic_vector (7 downto 0);  -- Input from datapath
+    datapath_in       : out std_logic_vector (7 downto 0);  -- Output to datapath
     mux_sel           : out std_logic_vector (1 downto 0);
     load_xyz, funct   : out std_logic_vector (2 downto 0);
     write             : out std_logic;
@@ -170,7 +171,26 @@ begin  -- lut
           set_PC_to <= instruction(7 downto 0);
           set_PC <= '1';
         end if;
-      when others => null;
+      when others =>
+        if instruction(15 downto 14) = "00" then  -- BEQ
+          -- The first two bits id, the next three are used to point
+          if state = "010" then
+            load_xyz <=  "100";
+            read_to <= instruction(13 downto 11);
+          elsif state  = "011" then
+            load_xyz <=  "010";
+            read_to <= instruction(10 downto 8);
+          elsif state = "100" then
+            funct <=  "00";             -- '-'
+            load_xyz <= "001";
+          elsif state = "101" then
+            if datapath = "00000000" then  -- jump to specified location
+              set_PC_to <=  instruction(7 downto 0);
+              set_PC <= '1';
+            end if;
+          end if;
+        end if;
+        null;
     end case;
   end process;
 end lut;
@@ -216,7 +236,7 @@ begin  -- behavioural
           end if;
         when "011" => state <= "100";
         when "100" =>                   -- Filter out type 2's
-          if (instruction(15 downto 11) = "11000") or (instruction(15 downto 0) = "11010") then
+          if (instruction(15 downto 11) = "11000") or (instruction(15 downto 11) = "11010") then
             state <= "000";
             get_next_instruction <= '1';
           else
@@ -247,11 +267,12 @@ entity controller is
   port (
     -- INPUT
     clk               : in  std_logic;
-    instruction_in    : in  std_logic_vector (15 downto 0);  -- from mem
+    instruction_in    : in  std_logic_vector (15 downto 0); -- from mem
+    datapath          : in  std_logic_vector (7 downto 0);  -- from datapath
     -- OUTPUT
-    get_next, set_PC  : out std_logic;                       -- to mem
+    get_next, set_PC  : out std_logic;                      -- to mem
     set_PC_to         : out std_logic_vector (7 downto 0);
-    write             : out std_logic;                       -- to datapath
+    write             : out std_logic;                      -- to datapath
     datapath_in       : out std_logic_vector (7 downto 0);
     mux_sel, funct    : out std_logic_vector (1 downto 0);
     load_xyz          : out std_logic_vector (2 downto 0);
@@ -282,7 +303,8 @@ begin  -- control
     write_to    => write_to,
     read_to     => read_to,
     set_PC      => set_PC,
-    set_PC_to   => set_PC_to);
+    set_PC_to   => set_PC_to,
+    datapath    => datapath);
 
   p3 : state_machine port map (
     instruction          => instruction,

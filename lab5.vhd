@@ -24,8 +24,11 @@ architecture behavioural of lab5 is
   signal instruction         : std_logic_vector (15 downto 0); -- From mem to controller
   signal to_PC               : std_logic_vector (7 downto 0);  -- From the controller to the mem
   signal get_next, import_PC : std_logic;
+
+  signal datapath_out        : std_logic_vector (7 downto 0);  -- From datapath to conroller
 begin
   clk <= key(0);
+  ledg <= datapath_out;
   ledr(17) <= get_next;
   
   u2: memory
@@ -44,6 +47,7 @@ begin
       -- INPUT
       clk            => clk,
       instruction_in => instruction,    -- From the mem
+      datapath       => datapath_out,   -- From the datapath
       -- OUTPUT
       get_next       => get_next,       -- To the mem
       set_PC         => import_PC,
@@ -71,7 +75,7 @@ begin
       readnum       => read_to,
       funct         => funct,
       -- OUTPUT
-      datapath_out  => ledg,            -- To display
+      datapath_out  => datapath_out,            -- To display
       datapath_out2 => ledr);
 
 end behavioural;
