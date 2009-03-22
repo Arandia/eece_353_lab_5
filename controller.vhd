@@ -190,7 +190,6 @@ begin  -- lut
             end if;
           end if;
         end if;
-        null;
     end case;
   end process;
 end lut;
