@@ -1,0 +1,6 @@
+0) load 1, '1';;  load reg #1 with 1
+1) load 2, '5';;  load reg #2 with 5
+2) add 0, 1, 0;;  add reg #1 to reg #0, store in reg #0
+3) cje 5), 2, 0;; compare reg #0 and reg #2, jump to 5) if equal
+4) jump 2);;      jump to 2)
+5) do something random to see we're finished
