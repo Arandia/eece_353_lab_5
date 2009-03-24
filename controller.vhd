@@ -41,8 +41,8 @@ entity decode is
     state             : in  std_logic_vector (2 downto 0);
     datapath          : in  std_logic_vector (7 downto 0);  -- Input from datapath
     datapath_in       : out std_logic_vector (7 downto 0);  -- Output to datapath
-    mux_sel           : out std_logic_vector (1 downto 0);
-    load_xyz, funct   : out std_logic_vector (2 downto 0);
+    mux_sel, funct    : out std_logic_vector (1 downto 0);
+    load_xyz          : out std_logic_vector (2 downto 0);
     write             : out std_logic;
     write_to, read_to : out std_logic_vector (2 downto 0);
     set_PC            : out std_logic;
@@ -64,7 +64,7 @@ begin  -- lut
     datapath_in <= "00000000";
     mux_sel <= "00";
     load_xyz <= "000";
-    funct <= "000";
+    funct <= "00";
     write <= '0';
     write_to <= "000";
     read_to <= "000";
@@ -86,7 +86,7 @@ begin  -- lut
           funct <= "01";                --  '+'
           load_xyz <= "001";
         elsif state = "100" then
-          mux_sel = "10";
+          mux_sel <= "10";
           write_to <= instruction(10 downto 8);
           write <= '1';
         end if;
@@ -115,7 +115,7 @@ begin  -- lut
           load_xyz <= "001";
         elsif state = "101" then
           mux_sel <= "10";
-          write = '1';
+          write <= '1';
           write_to <= instruction(10 downto 8);
         end if;
       when "10010" =>                   -- Sub
@@ -131,7 +131,7 @@ begin  -- lut
           load_xyz <= "001";
         elsif state =  "101" then
           mux_sel <= "10";
-          write = '1';
+          write <= '1';
           write_to <= instruction(10 downto 8);
         end if;
       when "10101" =>                   -- Mul
@@ -163,7 +163,7 @@ begin  -- lut
           load_xyz <= "001";
         elsif state =  "101" then
           mux_sel <= "10";
-          write = '1';
+          write <= '1';
           write_to <= instruction(10 downto 8);
         end if;
       when "11001" =>                   -- Jump
@@ -283,6 +283,34 @@ architecture control of controller is
   signal load_ir : std_logic;
   signal instruction : std_logic_vector (15 downto 0);
   signal state : std_logic_vector (2 downto 0);
+  
+  component inst_reg
+    port (
+      instruction_in : in  std_logic_vector (15 downto 0);
+      load_ir        : in  std_logic;
+      clk            : in  std_logic;
+      instruction    : out std_logic_vector (15 downto 0));
+  end component;
+  
+  component decode
+    port (
+      instruction       : in  std_logic_vector (15 downto 0);
+      state             : in  std_logic_vector (2 downto 0);
+      datapath_in       : out std_logic_vector (7 downto 0);
+      mux_sel, funct    : out std_logic_vector (1 downto 0);
+      load_xyz          : out std_logic_vector (2 downto 0);
+      write             : out std_logic;
+      write_to, read_to : out std_logic_vector (2 downto 0));
+  end component;
+  
+  component state_machine
+    port (
+      instruction          : in  std_logic_vector (15 downto 0);
+      clk                  : in  std_logic;
+      get_next_instruction : out std_logic;
+      load_ir              : out std_logic;
+      state_out            : out std_logic_vector (2 downto 0));
+  end component;
 begin  -- control
 
   p1 : inst_reg port map (
@@ -308,7 +336,7 @@ begin  -- control
   p3 : state_machine port map (
     instruction          => instruction,
     clk                  => clk,
-    get_next_instruction => get_next_instruction,
+    get_next_instruction => get_next,
     load_ir              => load_ir,
     state_out            => state);
   
