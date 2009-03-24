@@ -148,7 +148,7 @@ entity datapath is
 	  loadz        : in std_logic;
 	  clk          : in std_logic;
 	  datapath_out : out std_logic_vector(7 downto 0);
-	  datapath_out2: out std_logic_vector(17 downto 0));
+	  datapath_out2: out std_logic_vector(16 downto 0));
 end datapath ;
 
 
@@ -242,7 +242,7 @@ begin
   datapath_out <= z;
   datapath_out2(7 downto 0) <= postRAM;
   datapath_out2(15 downto 8) <= preRAM;
-  datapath_out2(17 downto 16) <= "00";
+  datapath_out2(16) <= '0';
   
 end behavioural;
 

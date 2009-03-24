@@ -58,7 +58,7 @@ begin  -- lut
   -- type   : combinational
   -- inputs : instruction, state
   -- outputs: EVERYTHING!
-  process (instruction, state)
+  process (instruction, state, datapath)
   begin  -- process
     -- Make sure it's synthesizable...
     datapath_in <= "00000000";
@@ -147,7 +147,7 @@ begin  -- lut
           load_xyz <= "001";
         elsif state =  "101" then
           mux_sel <= "10";
-          write = '1';
+          write <= '1';
           write_to <= instruction(10 downto 8);
         end if;
       when "10111" =>                   -- And
@@ -296,11 +296,14 @@ architecture control of controller is
     port (
       instruction       : in  std_logic_vector (15 downto 0);
       state             : in  std_logic_vector (2 downto 0);
+      datapath          : in  std_logic_vector (7 downto 0);
       datapath_in       : out std_logic_vector (7 downto 0);
       mux_sel, funct    : out std_logic_vector (1 downto 0);
       load_xyz          : out std_logic_vector (2 downto 0);
       write             : out std_logic;
-      write_to, read_to : out std_logic_vector (2 downto 0));
+      write_to, read_to : out std_logic_vector (2 downto 0);
+      set_PC            : out std_logic;
+      set_PC_to         : out std_logic_vector (7 downto 0));
   end component;
   
   component state_machine

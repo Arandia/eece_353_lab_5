@@ -17,7 +17,6 @@ entity PC is
 end PC;
 
 architecture pc_arch of PC is
-  variable bank : std_logic_vector (7 downto 0) := "00000000";  -- The current PC value
 begin  -- pc_arch
 
   -- purpose: This implements the register bank that is the PC
@@ -25,6 +24,7 @@ begin  -- pc_arch
   -- inputs : clk, reset
   -- outputs: bank
   process (clk, reset)
+    variable bank : std_logic_vector (7 downto 0) := "00000000";  -- The current PC value
   begin  -- process
     if reset = '1' then                 -- asynchronous reset (active low)
       bank := "00000000";
@@ -35,10 +35,10 @@ begin  -- pc_arch
         bank := bank + 1;
       end if;
     end if;
-  end process;
-
-  PC_out <= bank;
+    
+    PC_out <= bank;
   
+  end process;
 end pc_arch;
 
 
@@ -65,7 +65,7 @@ architecture mem of memory is
   signal PC_out : std_logic_vector (7 downto 0);
 
   component PC
-    generic (
+    port (
       clk       : in  std_logic;
       reset     : in  std_logic;
       loadPC    : in  std_logic;          -- This sends the PC to the ROM

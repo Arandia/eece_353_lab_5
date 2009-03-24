@@ -41,7 +41,7 @@ begin
       PC_in           => to_PC,
       -- OUTPUT
       instruction_out => instruction);  -- To the controller
-  o
+
   u0: controller
     port map (
       -- INPUT
@@ -58,7 +58,7 @@ begin
       write_to       => write_to,
       read_to        => read_to,
       funct          => funct,
-      datapath_in    => datapath_in)
+      datapath_in    => datapath_in);
   
   u1: datapath
     port map(
@@ -76,7 +76,7 @@ begin
       funct         => funct,
       -- OUTPUT
       datapath_out  => datapath_out,            -- To display
-      datapath_out2 => ledr);
+      datapath_out2 => ledr(16 downto 0));
 
 end behavioural;
 
